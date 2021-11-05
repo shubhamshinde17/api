@@ -2,6 +2,8 @@ package com.api.api.controllers;
 
 import java.util.List;
 
+import com.api.api.constants.AuthEndpoints;
+import com.api.api.constants.UserMessage;
 import com.api.api.models.*;
 import com.api.api.objects.Response;
 import com.api.api.objects.Token;
@@ -32,7 +34,7 @@ public class AuthController {
     @Autowired
     private TokenService tokenService;
 
-    @PostMapping(value = "/login", produces = APPLICATION_JSON)
+    @PostMapping(value = AuthEndpoints.LOGIN, produces = APPLICATION_JSON)
     public ResponseEntity<String> loginUser(@RequestBody User user) {
         try {
             String userPassword = user.getPassword();
@@ -43,19 +45,19 @@ public class AuthController {
                     UserAuth userAuth = new UserAuth(user.getUserId(), user.getLoginId(), user.getEmail(), 0);
                     authService.createToken(userAuth);
                     Token generatedToken = tokenService.getToken();
-                    Response response = new Response(200, "User logged In!", "Success", generatedToken);
+                    Response response = new Response(200, UserMessage.LOGIN_SUCCESS, "SUCCESS", generatedToken);
                     return new ResponseEntity<String>(response.toString(), HttpStatus.OK);
                 } else {
-                    Response response = new Response(401, "Wrong Username or Password!", "AUTH_ISSUE", null);
+                    Response response = new Response(401, UserMessage.WRONG_USER_PASS, "AUTH_ISSUE", null);
                     return new ResponseEntity<String>(response.toString(), HttpStatus.UNAUTHORIZED);
                 }
             } else {
-                Response response = new Response(404, "User not found!", "NOT_FOUND", null);
+                Response response = new Response(404, UserMessage.USER_NOT_FOUND, "NOT_FOUND", null);
                 return new ResponseEntity<String>(response.toString(), HttpStatus.NOT_FOUND);
             }
         } catch (Exception e) {
             LoggerService.getLogger().info("DEBUG: " + e.toString());
-            Response response = new Response(500, "Internal Server Error!", "SERVER_ERROR", null);
+            Response response = new Response(500, UserMessage.INTERNAL_SERVER_ERR, e.toString(), null);
             return new ResponseEntity<String>(response.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
