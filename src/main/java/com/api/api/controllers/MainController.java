@@ -85,6 +85,7 @@ public class MainController {
             if (authService.isAuthenticated(authBearerToken)) {
                 Response response = new Response(200, "Success!", "Success", null);
                 User saveduser = userRepo.findById(id).get();
+                saveduser.setPassword("<HIDDEN>");
                 response.setData(saveduser);
                 return new ResponseEntity<String>(response.toString(), HttpStatus.OK);
             } else {
@@ -92,7 +93,7 @@ public class MainController {
                 return new ResponseEntity<String>(response.toString(), HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
-            e.getStackTrace();
+            e.printStackTrace();
             Response response = new Response(500, "Internal Server Error!", "SERVER_ERROR", null);
             return new ResponseEntity<String>(response.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
         }

@@ -31,14 +31,23 @@ public class CustomEncryption {
 
     public String encryptData(String data) {
         String ACCESS_KEY = appProps.getApplicationProperties("ACCESS_KEY");
-        String base64Str = Base64.getEncoder().encodeToString(data.getBytes());
-        base64Str = Base64.getEncoder().encodeToString(base64Str.concat(ACCESS_KEY).getBytes());
-        return base64Str;
+        String encodedString = Base64.getEncoder().encodeToString(data.getBytes());
+        encodedString = Base64.getEncoder().encodeToString(encodedString.concat(ACCESS_KEY).getBytes());
+        StringBuilder returnStr = new StringBuilder();
+        for (int i = encodedString.length() - 1; i >= 0; i--) {
+            returnStr.append(encodedString.charAt(i));
+        }
+        encodedString = returnStr.toString().replaceAll("=", "");
+        return encodedString;
     }
 
     public String decryptData(String data) {
         String ACCESS_KEY = appProps.getApplicationProperties("ACCESS_KEY");
-        String decryptedBase64Str = new String(Base64.getDecoder().decode(data));
+        StringBuilder returnStr = new StringBuilder();
+        for (int i = data.length() - 1; i >= 0; i--) {
+            returnStr.append(data.charAt(i));
+        }
+        String decryptedBase64Str = new String(Base64.getDecoder().decode(returnStr.toString()));
         decryptedBase64Str = decryptedBase64Str.replaceAll(ACCESS_KEY, "");
         decryptedBase64Str = new String(Base64.getDecoder().decode(decryptedBase64Str));
         return decryptedBase64Str;

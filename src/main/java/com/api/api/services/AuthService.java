@@ -21,11 +21,10 @@ public class AuthService {
     private TokenService tokenService;
 
     public Boolean isAuthenticated(String accessToken) {
-        cypher.decryptData(accessToken);
         long dateTimeSeconds = new Date().getTime();
-        String userAuthString = cypher.getDecryptedData();
+        String userAuthString = cypher.decryptData(accessToken);
         UserAuth userAuth = new Gson().fromJson(userAuthString, UserAuth.class);
-        if ((userAuth.getIat() + 3600000) < dateTimeSeconds) {
+        if ((userAuth.getIat() + 3600000) > dateTimeSeconds) {
             LoggerService.getLogger().info("Access Token is Valid!");
             return true;
         } else {
