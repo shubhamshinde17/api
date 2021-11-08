@@ -10,7 +10,7 @@
         let ws;
 
         function connect() {
-            ws = new WebSocket("ws://spark-tech-stage.herokuapp.com/ws");
+            ws = new WebSocket("wss://spark-tech-stage.herokuapp.com/ws");
             ws.onmessage = function(e) {
                 printMessage(e.data);
             }
