@@ -51,11 +51,11 @@ public class AuthController {
                     return new ResponseEntity<String>(response.toString(), HttpStatus.OK);
                 } else {
                     Response response = new Response(401, UserMessage.WRONG_USER_PASS, "AUTH_ISSUE", null);
-                    return new ResponseEntity<String>(response.toString(), HttpStatus.UNAUTHORIZED);
+                    return new ResponseEntity<String>(response.toString(), HttpStatus.OK);
                 }
             } else {
                 Response response = new Response(404, UserMessage.USER_NOT_FOUND, "NOT_FOUND", null);
-                return new ResponseEntity<String>(response.toString(), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<String>(response.toString(), HttpStatus.OK);
             }
         } catch (Exception e) {
             LoggerService.getLogger().info("DEBUG: " + e.toString());
