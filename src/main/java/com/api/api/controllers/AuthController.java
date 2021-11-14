@@ -13,13 +13,16 @@ import com.api.api.services.AuthService;
 import com.api.api.services.CustomEncryption;
 import com.api.api.services.LoggerService;
 import com.api.api.services.TokenService;
+import com.google.gson.Gson;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -83,6 +86,38 @@ public class AuthController {
                 return new ResponseEntity<String>(response.toString(), HttpStatus.OK);
             } else {
                 LoggerService.getLogger().info("User data: " + user.toString());
+                Response response = new Response(406, UserMessage.INSUFFICIENT_DATA, "INSUFFICIENT_DATA", null);
+                return new ResponseEntity<String>(response.toString(), HttpStatus.OK);
+            }
+
+        } catch (Exception e) {
+            LoggerService.getLogger().info("DEBUG: " + e.toString());
+            Response response = new Response(500, UserMessage.INTERNAL_SERVER_ERR, e.toString(), null);
+            return new ResponseEntity<String>(response.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping(value = AuthEndpoints.CURRENT, produces = APPLICATION_JSON)
+    public ResponseEntity<String> currentUser(@RequestHeader HttpHeaders headers) {
+        try {
+            String authBearerToken = headers.get("Authorization").get(0).toString().replaceAll("Bearer ", "");
+            if (authBearerToken != null) {
+                UserAuth userAuth = new UserAuth("", "", "", 0);
+                try {
+                    userAuth = new Gson().fromJson(cypher.decryptData(authBearerToken), UserAuth.class);
+                } catch (Exception e) {
+                    userAuth = null;
+                }
+                if (userAuth != null) {
+                    User user = userRepo.findById(userAuth.getUserId()).get();
+                    Response response = new Response(200, "Token Validated!", "CURRENT_USER_VALID", user.toString());
+                    return new ResponseEntity<String>(response.toString(), HttpStatus.OK);
+                } else {
+                    Response response = new Response(403, UserMessage.USER_NOT_FOUND, "AUTH_FAILED",
+                            new Gson().toString());
+                    return new ResponseEntity<String>(response.toString(), HttpStatus.OK);
+                }
+            } else {
                 Response response = new Response(406, UserMessage.INSUFFICIENT_DATA, "INSUFFICIENT_DATA", null);
                 return new ResponseEntity<String>(response.toString(), HttpStatus.OK);
             }
