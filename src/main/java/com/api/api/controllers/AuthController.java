@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.api.api.constants.AuthEndpoints;
 import com.api.api.constants.UserMessage;
+import com.api.api.constants.UserRoles;
 import com.api.api.models.*;
 import com.api.api.objects.Response;
 import com.api.api.objects.Token;
@@ -78,6 +79,8 @@ public class AuthController {
                 List<User> ifExistingUser = userRepo.getUserByLoginIdOrEmail(user.getLoginId(), user.getEmail());
                 if (ifExistingUser.size() == 0) {
                     user.setPassword(cypher.encryptData(user.getPassword()));// Encrypt Password to store into DB
+                    user.setStatus("active");
+                    user.setRole(UserRoles.CLIENT);
                     User createdUser = userRepo.save(user);
                     UserAuth userAuth = new UserAuth(user.getUserId(), user.getLoginId(), user.getEmail(), 0);
                     authService.createToken(userAuth);
@@ -96,6 +99,23 @@ public class AuthController {
                 return new ResponseEntity<String>(response.toString(), HttpStatus.OK);
             }
 
+        } catch (Exception e) {
+            LoggerService.getLogger().info("DEBUG: " + e.toString());
+            Response response = new Response(500, UserMessage.INTERNAL_SERVER_ERR, e.toString(), null);
+            return new ResponseEntity<String>(response.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping(value = AuthEndpoints.UPDATE_CURRENT_USER, produces = APPLICATION_JSON)
+    public ResponseEntity<String> updateCurrentUser(@RequestBody User user, @RequestHeader HttpHeaders headers) {
+        try {
+            User updatedUser = userRepo.getUserByLoginIdOrEmail(user.getLoginId(), user.getEmail()).get(0);
+            updatedUser.setLoginId(user.getLoginId());
+            updatedUser.setAge(user.getAge());
+            updatedUser.setFullName(user.getFullName());
+
+            Response response = new Response(200, UserMessage.USER_UPDATED, "USER_UPDATED", null);
+            return new ResponseEntity<String>(response.toString(), HttpStatus.OK);
         } catch (Exception e) {
             LoggerService.getLogger().info("DEBUG: " + e.toString());
             Response response = new Response(500, UserMessage.INTERNAL_SERVER_ERR, e.toString(), null);

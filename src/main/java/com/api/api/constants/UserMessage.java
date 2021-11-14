@@ -10,4 +10,6 @@ public class UserMessage {
     public static final String SIGNUP_DONE = "Welcome, ";
     public static final String USER_EXISTS = "User already Exists, Please try login!";
 
+    public static final String USER_UPDATED = "User updated!";
+
 }
