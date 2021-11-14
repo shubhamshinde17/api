@@ -68,7 +68,7 @@ public class AuthController {
         }
     }
 
-    @PostMapping()
+    @PostMapping(value = AuthEndpoints.SIGNUP, produces = APPLICATION_JSON)
     public ResponseEntity<String> signupUser(@RequestBody User user) {
         try {
             if (user != null && user.getEmail() != null && user.getLoginId() != null && user.getPassword() != null) {
