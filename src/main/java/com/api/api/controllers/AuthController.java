@@ -75,15 +75,21 @@ public class AuthController {
     public ResponseEntity<String> signupUser(@RequestBody User user) {
         try {
             if (user != null && user.getEmail() != null && user.getLoginId() != null && user.getPassword() != null) {
-                user.setPassword(cypher.encryptData(user.getPassword()));// Encrypt Password to store into DB
-                User createdUser = userRepo.save(user);
-                UserAuth userAuth = new UserAuth(user.getUserId(), user.getLoginId(), user.getEmail(), 0);
-                authService.createToken(userAuth);
-                Token generatedToken = tokenService.getToken();
-                LoggerService.getLogger().info("Created User: " + createdUser.toString());
-                Response response = new Response(200, UserMessage.SIGNUP_DONE + user.getLoginId(), "SIGNUP_DONE",
-                        generatedToken);
-                return new ResponseEntity<String>(response.toString(), HttpStatus.OK);
+                List<User> ifExistingUser = userRepo.getUserByLoginIdOrEmail(user.getLoginId(), user.getEmail());
+                if (ifExistingUser.size() == 0) {
+                    user.setPassword(cypher.encryptData(user.getPassword()));// Encrypt Password to store into DB
+                    User createdUser = userRepo.save(user);
+                    UserAuth userAuth = new UserAuth(user.getUserId(), user.getLoginId(), user.getEmail(), 0);
+                    authService.createToken(userAuth);
+                    Token generatedToken = tokenService.getToken();
+                    LoggerService.getLogger().info("Created User: " + createdUser.toString());
+                    Response response = new Response(200, UserMessage.SIGNUP_DONE + user.getLoginId(), "SIGNUP_DONE",
+                            generatedToken);
+                    return new ResponseEntity<String>(response.toString(), HttpStatus.OK);
+                } else {
+                    Response response = new Response(409, UserMessage.USER_EXISTS, "USER_EXISTS", null);
+                    return new ResponseEntity<String>(response.toString(), HttpStatus.OK);
+                }
             } else {
                 LoggerService.getLogger().info("User data: " + user.toString());
                 Response response = new Response(406, UserMessage.INSUFFICIENT_DATA, "INSUFFICIENT_DATA", null);
