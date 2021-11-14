@@ -110,11 +110,10 @@ public class AuthController {
                 }
                 if (userAuth != null) {
                     User user = userRepo.findById(userAuth.getUserId()).get();
-                    Response response = new Response(200, "Token Validated!", "CURRENT_USER_VALID", user.toString());
+                    Response response = new Response(200, "Token Validated!", "CURRENT_USER_VALID", user);
                     return new ResponseEntity<String>(response.toString(), HttpStatus.OK);
                 } else {
-                    Response response = new Response(403, UserMessage.USER_NOT_FOUND, "AUTH_FAILED",
-                            new Gson().toString());
+                    Response response = new Response(403, UserMessage.USER_NOT_FOUND, "AUTH_FAILED", new Gson());
                     return new ResponseEntity<String>(response.toString(), HttpStatus.OK);
                 }
             } else {
